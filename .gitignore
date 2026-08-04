@@ -1,0 +1,4 @@
+# Build output — reproduce with ./build.sh
+DECkeys.app/
+*.o
+.DS_Store
