@@ -43,11 +43,54 @@
   "//notes2": "(ZK-4673-85) — the printed manual, not a screen capture. PF3 and",
   "//notes3": "KP8/KP9/KP4/KP6 are genuinely unused in Notes; blank caps are",
   "//notes4": "information, not omissions. The figure shows no Gold layer.",
+  "//mail": "MAIL is transcribed from the VMS MAIL keypad figure ZK-1744-84.",
+  "//mail2": "Every key there carries a Gold function too — hover for it.",
   "//conv": "conv:true = NOT an LK201 key, but a convenience. Control chars",
   "//conv2": "VMS leans on constantly. Tinted so the panel never pretends to",
   "//conv3": "be reproducing hardware. \\cZ = Ctrl-Z; sent as letter+Control.",
 
   "legends": {
+    "EDT": {
+      "PF1":  { "legend": "GOLD", "goldCap": true },
+      "PF2":  { "legend": "HELP" },
+      "PF3":  { "legend": "FNDNXT",  "gold": "FIND" },
+      "PF4":  { "legend": "DEL L",   "gold": "UND L" },
+      "7":    { "legend": "PAGE",    "gold": "COMMAND" },
+      "8":    { "legend": "SECT",    "gold": "FILL" },
+      "9":    { "legend": "APPEND",  "gold": "REPLACE" },
+      "-":    { "legend": "DEL W",   "gold": "UND W" },
+      "4":    { "legend": "ADVANCE", "gold": "BOTTOM" },
+      "5":    { "legend": "BACKUP",  "gold": "TOP" },
+      "6":    { "legend": "CUT",     "gold": "PASTE" },
+      ",":    { "legend": "DEL C",   "gold": "UND C" },
+      "1":    { "legend": "WORD",    "gold": "CHNGCASE" },
+      "2":    { "legend": "EOL",     "gold": "DEL EOL" },
+      "3":    { "legend": "CHAR",    "gold": "SPECINS" },
+      "Entr": { "legend": "ENTER",   "gold": "SUBS" },
+      "0":    { "legend": "LINE",    "gold": "OPEN LINE" },
+      ".":    { "legend": "SELECT",  "gold": "RESET" },
+      "^C":   { "legend": "Cancel" }
+    },
+    "MAIL": {
+      "PF1":  { "legend": "GOLD", "goldCap": true },
+      "PF2":  { "legend": "HELP",    "gold": "DIR/FOLDER" },
+      "PF3":  { "legend": "EXTRACT", "note": "EXTRACT/MAIL", "gold": "EXTRACT" },
+      "PF4":  { "legend": "ERASE",   "gold": "SELECT/MAIL" },
+      "7":    { "legend": "SEND",    "gold": "SEND/EDIT" },
+      "8":    { "legend": "REPLY",   "gold": "REP/EDIT/EXT" },
+      "9":    { "legend": "FORWARD", "gold": "FORWARD/EDIT" },
+      "-":    { "legend": "READ/NEW","gold": "SHOW/NEW" },
+      "4":    { "legend": "CURRENT", "gold": "CURRENT/EDIT" },
+      "5":    { "legend": "FIRST",   "gold": "FIRST/EDIT" },
+      "6":    { "legend": "LAST",    "gold": "LAST/EDIT" },
+      ",":    { "legend": "DIR/NEW", "gold": "DIR MAIL" },
+      "1":    { "legend": "BACK",    "gold": "BACK/EDIT" },
+      "2":    { "legend": "PRINT",   "gold": "PRINT/PR/NOT" },
+      "3":    { "legend": "DIR",     "gold": "DIR/ST=99999" },
+      "Entr": { "legend": "SELECT" },
+      "0":    { "legend": "NEXT",    "gold": "NEXT/EDIT" },
+      ".":    { "legend": "FILE",    "gold": "DELETE" }
+    },
     "NOTES": {
       "PF1":  { "legend": "GOLD", "goldCap": true },
       "PF2":  { "legend": "HELP" },
@@ -63,7 +106,14 @@
       "0":    { "legend": "NEXT SCREEN" },
       ".":    { "legend": "PREV SCREEN" }
     },
-    "EDT": {
+    "EVE-EDT": {
+      "^B":   { "legend": "Recall" },
+      "^E":   { "legend": "End Line" },
+      "^R":   { "legend": "Remember" },
+      "^U":   { "legend": "Erase>Sta", "note": "Erase to start of line" },
+      "^V":   { "legend": "Quote" },
+      "^W":   { "legend": "Refresh" },
+      "^Z":   { "legend": "Exit" },
       "PF1":  { "legend": "Gold key", "goldCap": true },
       "PF2":  { "legend": "HELP",    "gold": "KeyDefs" },
       "PF3":  { "legend": "FndNxt",  "gold": "Find" },
@@ -128,13 +178,13 @@
     { "label": "6",    "row": 8, "bytes": "\\eOv" },
     { "label": ",",    "row": 8, "bytes": "\\eOl" },
 
-    { "label": "1",    "row": 9, "bytes": "\\eOq" },
-    { "label": "2",    "row": 9, "bytes": "\\eOr" },
-    { "label": "3",    "row": 9, "bytes": "\\eOs" },
-    { "label": "Entr", "row": 9, "bytes": "\\eOM" },
+    { "label": "1",    "row": 9, "col": 0, "bytes": "\\eOq" },
+    { "label": "2",    "row": 9, "col": 1, "bytes": "\\eOr" },
+    { "label": "3",    "row": 9, "col": 2, "bytes": "\\eOs" },
+    { "label": "Entr", "row": 9, "col": 3, "rowspan": 2, "bytes": "\\eOM" },
 
-    { "label": "0",    "row": 10, "bytes": "\\eOp" },
-    { "label": ".",    "row": 10, "bytes": "\\eOn" },
+    { "label": "0",    "row": 10, "col": 0, "span": 2, "bytes": "\\eOp" },
+    { "label": ".",    "row": 10, "col": 2, "bytes": "\\eOn" },
 
     { "label": "^C",   "row": 11, "conv": true, "bytes": "\\cC", "legend": "Cancel" },
     { "label": "^Y",   "row": 11, "conv": true, "bytes": "\\cY", "legend": "Interrupt" },
@@ -144,6 +194,11 @@
     { "label": "^W",   "row": 12, "conv": true, "bytes": "\\cW", "legend": "Refresh" },
     { "label": "^B",   "row": 12, "conv": true, "bytes": "\\cB", "legend": "Recall" },
     { "label": "^R",   "row": 12, "conv": true, "bytes": "\\cR", "legend": "Retype" },
-    { "label": "^Q",   "row": 12, "conv": true, "bytes": "\\cQ", "legend": "Resume" }
+    { "label": "^Q",   "row": 12, "conv": true, "bytes": "\\cQ", "legend": "Resume" },
+
+    { "label": "^E",   "row": 13, "conv": true, "bytes": "\\cE", "legend": "End Line" },
+    { "label": "^U",   "row": 13, "conv": true, "bytes": "\\cU", "legend": "Erase" },
+    { "label": "^V",   "row": 13, "conv": true, "bytes": "\\cV", "legend": "Quote" },
+    { "label": "^O",   "row": 13, "conv": true, "bytes": "\\cO", "legend": "Discard" }
   ]
 }

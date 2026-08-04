@@ -37,6 +37,11 @@ struct KeySpec: Codable {
     /// Not a key on a real LK201 — a convenience (Ctrl-Z and friends). Painted
     /// differently so the panel never pretends it is reproducing hardware.
     var conv: Bool? = false
+    /// Explicit grid position and vertical extent. Needed for the numeric
+    /// keypad, where 0 is double-wide and Enter is double-HIGH — without
+    /// these the last two rows cannot be shaped like the real thing.
+    var col: Int? = nil
+    var rowspan: Int? = 1
     /// A legend that belongs to the KEY, not to an application — "Help" and
     /// "Do" are what DEC called F15 and F16 everywhere. Application-specific
     /// legends live in `legends` sets and take precedence over this.
@@ -321,7 +326,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         let widest = rows.map { $0.value.reduce(0) { $0 + max(1, $1.span ?? 1) } }.max() ?? 1
         let width  = pad + (w + pad) * CGFloat(widest)
         let keysH  = CGFloat(rows.count) * (h + pad)
-        let height = keysH + 58   // room for the picker + status
+        let height = keysH + 68   // room for the picker + status
 
         panel = NonActivatingPanel(
             contentRect: NSRect(x: 0, y: 0, width: width, height: height),
@@ -336,14 +341,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         let content = panel.contentView!
 
+        func rowBottom(_ ri: Int) -> CGFloat {
+            height - 12 - CGFloat(ri + 1) * (h + pad) + pad
+        }
         for (ri, row) in rows.enumerated() {
-            let y = height - 12 - CGFloat(ri + 1) * (h + pad) + pad
-            var x = pad
+            var col = 0
             for k in row.value {
-                let span = CGFloat(max(1, k.span ?? 1))
-                let cw = w * span + pad * (span - 1)     // a span-2 cap swallows the gap
-                let b = KeyButton(frame: NSRect(x: x, y: y, width: cw, height: h))
-                x += cw + pad
+                let span  = max(1, k.span ?? 1)
+                let rspan = max(1, k.rowspan ?? 1)
+                if let c = k.col { col = c }
+                let cw = w * CGFloat(span) + pad * CGFloat(span - 1)
+                let ch = h * CGFloat(rspan) + pad * CGFloat(rspan - 1)
+                // A tall cap hangs down into the rows below, so its bottom is
+                // the bottom of the LAST row it covers.
+                let y = rowBottom(ri + rspan - 1)
+                let x = pad + (w + pad) * CGFloat(col)
+                let b = KeyButton(frame: NSRect(x: x, y: y, width: cw, height: ch))
+                col += span
                 b.spec = k
                 let leg = activeLegends[k.label] ?? (k.legend.map { Legend(legend: $0) })
                 b.style(label: k.label, gold: leg?.goldCap == true, dark: k.dark == true,
@@ -359,7 +373,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Which application's legends to show. Byte mode works against every
         // target we have tested — terminals and ezalb alike — so the old
         // send-mode checkbox that lived here has been removed as dead weight.
-        let picker = FirstMousePopUp(frame: NSRect(x: pad, y: 26,
+        let picker = FirstMousePopUp(frame: NSRect(x: pad, y: 28,
                                                    width: width - pad * 2, height: 22))
         picker.addItems(withTitles: ["None"] + legendSets.keys.sorted())
         picker.selectItem(withTitle: legendSets[setName] != nil ? setName : "None")
