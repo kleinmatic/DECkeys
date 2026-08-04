@@ -14,6 +14,14 @@ passes these sequences straight through to the guest behind it.
 Written to make EDT, EVE and VAX Notes usable on OpenVMS from a laptop with no
 numeric keypad.
 
+<p align="center">
+  <img src="docs/panel.png" alt="The DECkeys panel, showing the MAIL overlay" width="300">
+</p>
+
+*The panel with the MAIL overlay selected — each cap shows what VMS MAIL does
+with that key. The teal keys at the bottom are conveniences, not LK201
+hardware.*
+
 ## Build and run
 
 ```sh
@@ -52,9 +60,12 @@ Layout, key codes, sizes and legends all live in `profile.json`, read at launch.
 { "label": "Do",  "row": 2, "bytes": "\\e[29~", "span": 2, "dark": true }
 ```
 
-`\e` is ESC (also `\r`, `\n`, `\t`). `span` gives a double-wide cap, as Do has on
-a real keyboard. `dark` paints the darker grey DEC moulded the function row and
-editing keypad in.
+`\e` is ESC; also `\r`, `\n`, `\t`, and `\cZ` for Ctrl-Z. `col` and `span` and
+`rowspan` place a cap on the grid — the numeric keypad's `0` is double-wide and
+`Enter` double-high, as on the hardware. `dark` paints the darker grey DEC
+moulded the function row and editing keypad in; `conv` marks a key that is *not*
+LK201 hardware but a convenience, and tints it so the panel never pretends
+otherwise.
 
 ## Overlays
 
@@ -66,19 +77,23 @@ nothing at all to VAX Notes.
 So legends are **sets**, chosen from the popup at the bottom of the panel:
 
 - **None** — the bare hardware. PF1 is just PF1.
-- **EDT** — EVE's EDT keypad emulation. Transcribed from EVE's own `GOLD-HELP`
-  diagram on a live OpenVMS system.
-- **NOTES** — VAX Notes. Transcribed from *Introduction to VAX Notes*,
-  Figure 1–1 (ZK-4673-85).
+- **EDT** — the EDT editor, from figure ZK-1688-84.
+- **EVE-EDT** — EVE's *emulation* of the EDT keypad, from EVE's own `GOLD-HELP`
+  diagram on a live OpenVMS system. Deliberately separate: EVE renames
+  CUT/PASTE to Remove/Insert Here and ADVANCE/BACKUP to Forward/Reverse, so
+  the same key means different things depending on which you are running.
+- **MAIL** — VMS MAIL, from figure ZK-1744-84. Every key has a Gold function.
+- **NOTES** — VAX Notes, from *Introduction to VAX Notes* figure ZK-4673-85.
 
 Hover a cap for the Gold-shifted function and the unabbreviated wording.
 
 Gold is a property of the **set**, not the key, so PF1 is only gold when an
 overlay is selected whose application treats it as a prefix.
 
-Adding an overlay is a JSON edit. Every one of these applications documents
-itself on screen — `GOLD-HELP` in EVE, `HELP KEYPAD` in EDT, PF2 in Notes —
-which is a far better source than anyone's memory.
+Adding an overlay is a JSON edit — see [AGENTS.md](AGENTS.md), which is written
+for exactly that job. Every one of these applications documents itself on screen
+(`GOLD-HELP` in EVE, `HELP KEYPAD` in EDT, PF2 in Notes) and DEC's manuals are
+on bitsavers; both are far better sources than anyone's memory.
 
 ## Keys deliberately absent
 
@@ -92,7 +107,7 @@ which is a far better source than anyone's memory.
 
 ## Notes for anyone hacking on this
 
-Four things cost real time and are not obvious:
+Five things cost real time and are not obvious:
 
 - **Do not sign with `--options runtime`.** The Hardened Runtime blocks
   synthetic event posting without specific entitlements, and the failure is
@@ -105,13 +120,18 @@ Four things cost real time and are not obvious:
   real event source macOS re-translates the virtual keycode and that wins —
   keycode 0 is `a` on a US layout, so every button typed "a". A `nil` source
   didn't fix it either. Pressing the real keys does.
+- **Control must be genuinely held**, not merely asserted in the event's flags.
+  Shift survives flags-only because the character is derived from keycode+shift,
+  but a client reading modifier *state* sees no Control unless a `flagsChanged`
+  event says so. Ctrl-Z reached nothing until DECkeys pressed `kVK_Control`.
 - **`.rounded` NSButtons ignore `bezelColor`** in current appearances *and*
   draw a fixed-height bezel inside whatever frame you give them, so a
   custom-coloured cap ends up a different size from its neighbours. All caps
   here are drawn directly.
 
 Launch with `open --stderr /tmp/deckeys.log DECkeys.app` to see the startup
-diagnostics — trust state, which profile loaded, panel geometry. Running the
+diagnostics — trust state, which profile loaded, panel geometry, and a hex dump
+of the bytes every key will send. Running the
 binary from a shell instead reports the *terminal's* Accessibility state, not
 the app's.
 

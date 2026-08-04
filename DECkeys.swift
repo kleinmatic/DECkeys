@@ -200,9 +200,24 @@ func postBytes(_ s: String) {
         if shift { flags.insert(.maskShift) }
         if ctrl  { flags.insert(.maskControl) }
         down.flags = flags; up.flags = flags
-        if false { down.flags = .maskShift; up.flags = .maskShift }
+
+        // Control needs to be genuinely HELD, not merely asserted in the
+        // event's flags (2026-08-04: Ctrl-Z reached nothing until this).
+        // Shift survives flags-only because the character is derived from
+        // keycode+shift, but a client reading modifier STATE sees no Control
+        // unless a flagsChanged event says so — which is what a real keyboard
+        // sends. kVK_Control = 0x3B.
+        func modifier(_ down: Bool) {
+            guard ctrl, let e = CGEvent(keyboardEventSource: src,
+                                        virtualKey: 0x3B, keyDown: down) else { return }
+            e.type = .flagsChanged
+            e.flags = down ? .maskControl : []
+            e.post(tap: .cghidEventTap)
+        }
+        modifier(true)
         down.post(tap: .cghidEventTap)
         up.post(tap: .cghidEventTap)
+        modifier(false)
     }
 }
 
@@ -403,6 +418,11 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         DECkeys: profile=\(from)
         DECkeys: keys=\(profile.keys.count) rows=\(rows.count) mode=\(profile.mode ?? "bytes")
         DECkeys: panel.frame=\(panel.frame) screens=\(NSScreen.screens.count)
+        DECkeys: bytes: \(profile.keys.compactMap { k -> String? in
+            guard let b = k.bytes else { return nil }
+            let hex = expand(b).unicodeScalars.map { String(format: "%02x", $0.value) }.joined(separator: " ")
+            return "\(k.label)=[\(hex)]"
+        }.joined(separator: "  "))
 
         """.data(using: .utf8)!)
     }
