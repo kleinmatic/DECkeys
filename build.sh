@@ -36,14 +36,17 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundleShortVersionString</key> <string>0.2</string>
     <key>CFBundleVersion</key>         <string>1</string>
     <key>LSMinimumSystemVersion</key>  <string>13.0</string>
+    <key>CFBundleIconFile</key>        <string>DECkeys</string>
     <key>LSUIElement</key>             <true/>
     <key>NSHighResolutionCapable</key> <true/>
 </dict>
 </plist>
 PLIST
 
-# The bundled copy is the fallback; the editable one lives beside the .app.
+# The bundled copy is the fallback; the editable one lives in ~/.config/deckeys.
 cp profile.json "$APP/Contents/Resources/profile.json"
+# Icon: the PF1 keycap. Regenerate with ./make-icon.sh if you change the art.
+[ -f DECkeys.icns ] && cp DECkeys.icns "$APP/Contents/Resources/DECkeys.icns"
 
 swiftc -O -o "$APP/Contents/MacOS/DECkeys" DECkeys.swift \
     -framework AppKit -framework ApplicationServices

@@ -397,9 +397,22 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // send-mode checkbox that lived here has been removed as dead weight.
         let about = FirstMouseButton(frame: NSRect(x: width - pad - 26, y: 28,
                                                    width: 26, height: 22))
-        about.bezelStyle = .rounded
-        about.title = "?"
-        about.font = NSFont.systemFont(ofSize: 11)
+        // Same teal as the convenience keys. Those are tinted to say "not
+        // LK201 hardware"; this is the same claim, one step further -- it does
+        // not even send anything, so it must not read as a key or a menu.
+        about.isBordered = false
+        about.wantsLayer = true
+        let convBase = NSColor.controlColor.usingColorSpace(.sRGB) ?? NSColor.controlColor
+        about.layer?.backgroundColor =
+            (convBase.blended(withFraction: 0.22, of: .systemTeal) ?? convBase).cgColor
+        about.layer?.cornerRadius = 5
+        about.layer?.borderWidth = 0.5
+        about.layer?.borderColor = NSColor.separatorColor.cgColor
+        about.attributedTitle = NSAttributedString(string: "i", attributes: [
+            .foregroundColor: NSColor.labelColor,
+            .font: NSFont.systemFont(ofSize: 12, weight: .semibold),
+            .paragraphStyle: { let p = NSMutableParagraphStyle(); p.alignment = .center; return p }(),
+        ])
         about.toolTip = "About DECkeys"
         about.target = self
         about.action = #selector(showAbout(_:))

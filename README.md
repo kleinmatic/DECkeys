@@ -78,6 +78,17 @@ moulded the function row and editing keypad in; `conv` marks a key that is *not*
 LK201 hardware but a convenience, and tints it so the panel never pretends
 otherwise.
 
+## The icon
+
+`DECkeys.icns` is generated, not drawn by hand — `./make-icon.sh` renders it
+from `make-icon.swift` (AppKit, no dependencies) and `sips`/`iconutil` build the
+`.icns`. It is the **PF1 keycap as DEC printed it**: a pale cream cap, `PF1` in
+the corner, and the orange GOLD marker below. Not the solid-gold cap the panel
+draws when an overlay is active — the real key is cream with an orange blob, and
+that blob is the whole reason the key matters.
+
+The `.icns` is committed so a fresh clone gets it without running anything.
+
 ## Overlays
 
 DEC printed a second legend on each keycap saying what the *application* did
