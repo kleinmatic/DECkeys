@@ -320,7 +320,7 @@ final class KeyButton: FirstMouseButton {
 
 // MARK: - app
 
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
     var panel: NonActivatingPanel!
     var keyButtons: [KeyButton] = []
     var legendSets: [String: [String: Legend]] = [:]
@@ -441,9 +441,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let vf = NSScreen.main?.visibleFrame {
             panel.setFrameOrigin(NSPoint(x: vf.minX + 40, y: vf.maxY - height - 40))
         }
-        // Closing must not deallocate it, or there is no way to get it back:
-        // an LSUIElement app has no Dock icon and no menu bar to reopen from.
-        panel.isReleasedWhenClosed = false
+        // Close = quit.  With no Dock icon and no menu bar there is nothing
+        // else the close button could sensibly mean, and a hidden-but-running
+        // instance is exactly the state that looks broken.
+        panel.delegate = self
         panel.orderFrontRegardless()   // show without activating us
 
         FileHandle.standardError.write("""
@@ -513,10 +514,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    /// Double-clicking the app while it is already running, or after you have
-    /// closed the panel, must bring the panel back.  Without this, relaunching
-    /// an LSUIElement app appears to do nothing at all -- no Dock icon, no menu
-    /// bar, no window -- which is indistinguishable from being broken.
+    func windowWillClose(_ note: Notification) { NSApp.terminate(nil) }
+
+    /// Relaunching while already running must bring the panel forward.  Without
+    /// this, double-clicking an LSUIElement app that is already up appears to do
+    /// nothing at all -- no Dock icon, no menu bar -- which is
+    /// indistinguishable from being broken.
     func applicationShouldHandleReopen(_ app: NSApplication, hasVisibleWindows: Bool) -> Bool {
         panel?.orderFrontRegardless()
         return true
