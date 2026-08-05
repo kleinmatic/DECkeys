@@ -103,6 +103,13 @@ func expand(_ s: String) -> String {
 func loadProfile() -> (Profile, String) {
     var tried: [String] = []
     var candidates: [URL] = []
+    // ~/.config/deckeys/profile.json first, so the app can be installed in
+    // /Applications and still have an editable profile outside the bundle --
+    // anything inside DECkeys.app is overwritten by the next build.
+    let cfg = ProcessInfo.processInfo.environment["XDG_CONFIG_HOME"]
+        .map { URL(fileURLWithPath: $0) }
+        ?? FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".config")
+    candidates.append(cfg.appendingPathComponent("deckeys/profile.json"))
     let bundle = Bundle.main.bundleURL
     candidates.append(bundle.deletingLastPathComponent().appendingPathComponent("profile.json"))
     if let r = Bundle.main.url(forResource: "profile", withExtension: "json") { candidates.append(r) }
@@ -388,8 +395,18 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         // Which application's legends to show. Byte mode works against every
         // target we have tested — terminals and ezalb alike — so the old
         // send-mode checkbox that lived here has been removed as dead weight.
+        let about = FirstMouseButton(frame: NSRect(x: width - pad - 26, y: 28,
+                                                   width: 26, height: 22))
+        about.bezelStyle = .rounded
+        about.title = "?"
+        about.font = NSFont.systemFont(ofSize: 11)
+        about.toolTip = "About DECkeys"
+        about.target = self
+        about.action = #selector(showAbout(_:))
+        content.addSubview(about)
+
         let picker = FirstMousePopUp(frame: NSRect(x: pad, y: 28,
-                                                   width: width - pad * 2, height: 22))
+                                                   width: width - pad * 3 - 26, height: 22))
         picker.addItems(withTitles: ["None"] + legendSets.keys.sorted())
         picker.selectItem(withTitle: legendSets[setName] != nil ? setName : "None")
         picker.font = NSFont.systemFont(ofSize: 10)
@@ -433,6 +450,31 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             if let c = sender.spec.keycode { postKeycode(CGKeyCode(c)) }
         case .bytes:
             if let b = sender.spec.bytes { postBytes(expand(b)) }
+        }
+    }
+
+    @objc func showAbout(_ sender: NSButton) {
+        let v = Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "?"
+        let a = NSAlert()
+        a.messageText = "DECkeys " + v
+        a.informativeText =
+            "An on-screen DEC keypad that sends to the frontmost application: "
+            + "PF1-PF4 (Gold), the LK201 numeric and editing keypads, and F6-F20.\n\n"
+            + "Key legends are transcribed from DEC's own manuals and from the "
+            + "applications' on-screen keypad diagrams \u{2014} EDT, EVE, VMS MAIL "
+            + "and VAX Notes.\n\n"
+            + "Companion to ezalb, Antoni Sawicki's VT420 emulator.\n\n"
+            + "GPL-2.0. No warranty."
+        a.addButton(withTitle: "OK")
+        a.addButton(withTitle: "GitHub")
+        // The panel never takes focus, so nothing has activated us; without
+        // this the alert opens behind whatever you were actually using.
+        NSApp.activate(ignoringOtherApps: true)
+        let r = a.runModal()
+        NSApp.setActivationPolicy(.accessory)
+        if r == .alertSecondButtonReturn,
+           let u = URL(string: "https://github.com/kleinmatic/DECkeys") {
+            NSWorkspace.shared.open(u)
         }
     }
 

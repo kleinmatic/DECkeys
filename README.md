@@ -25,10 +25,15 @@ hardware.*
 ## Build and run
 
 ```sh
-./make-cert.sh     # once — creates a local code-signing identity (see below)
+./make-cert.sh        # once — creates a local code-signing identity (see below)
 ./build.sh
 open DECkeys.app
+
+./build.sh install    # optional: copy it to /Applications
 ```
+
+Installing to `/Applications` does **not** cost you the Accessibility grant —
+it is keyed to the bundle identifier and signing certificate, not the path.
 
 Requires the Xcode command line tools. No Xcode project, no dependencies —
 one Swift file and a shell script.
@@ -53,7 +58,13 @@ Mac keycode a terminal turns into PF1.
 ## The profile
 
 Layout, key codes, sizes and legends all live in `profile.json`, read at launch.
-**Adding or changing keys needs no rebuild.**
+**Adding or changing keys needs no rebuild.** It is looked for in this order:
+
+1. `~/.config/deckeys/profile.json` — **yours**; edit this one
+2. `profile.json` beside the app — handy when running from the source tree
+3. the copy inside `DECkeys.app/Contents/Resources` — the shipped default
+
+Keep yours at (1): anything inside the bundle is replaced by the next build.
 
 ```json
 { "label": "PF1", "row": 6, "bytes": "\\eOP" },

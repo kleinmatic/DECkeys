@@ -65,3 +65,13 @@ fi
 echo "--- designated requirement (what TCC keys the grant on) ---"
 codesign -d -r- "$APP" 2>&1 | grep designated || true
 echo "built $APP"
+
+# ./build.sh install  -- put it in /Applications.  Safe: the Accessibility grant
+# is keyed to the bundle id + signing certificate, not the path, so it survives
+# the move (verified).  Your profile stays in ~/.config/deckeys/profile.json,
+# outside the bundle, so a rebuild cannot overwrite it.
+if [ "${1:-}" = install ]; then
+    rm -rf /Applications/DECkeys.app
+    cp -R "$APP" /Applications/
+    echo "installed /Applications/DECkeys.app"
+fi
