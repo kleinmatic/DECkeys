@@ -127,6 +127,25 @@ on bitsavers; both are far better sources than anyone's memory.
 - **Arrow keys** are omitted because your laptop has them — and Gold still
   works with them, since the panel's Gold is a real keystroke.
 
+## What it can do, and what that means
+
+DECkeys needs **Accessibility** because it posts synthetic key events. Two
+things follow that you should know before running it:
+
+- **`profile.json` is executable in the only sense that matters here.** Every
+  `bytes` value is typed into whatever application is frontmost. A profile you
+  did not write can type anything a person could — into your shell, your editor,
+  anything. Treat a profile from someone else exactly as you would a shell
+  script from someone else.
+- **`make-cert.sh` adds a self-signed code-signing certificate to your login
+  keychain.** It signs nothing but local builds of this app, is never added to
+  any system trust store, and exists solely so macOS stops treating each rebuild
+  as a different application (see below). Remove it with Keychain Access if you
+  would rather not keep it.
+
+There is no network code, no telemetry, and nothing is written outside
+`~/.config/deckeys/`.
+
 ## Notes for anyone hacking on this
 
 Five things cost real time and are not obvious:
