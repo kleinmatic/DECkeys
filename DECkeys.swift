@@ -441,6 +441,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         if let vf = NSScreen.main?.visibleFrame {
             panel.setFrameOrigin(NSPoint(x: vf.minX + 40, y: vf.maxY - height - 40))
         }
+        // Closing must not deallocate it, or there is no way to get it back:
+        // an LSUIElement app has no Dock icon and no menu bar to reopen from.
+        panel.isReleasedWhenClosed = false
         panel.orderFrontRegardless()   // show without activating us
 
         FileHandle.standardError.write("""
@@ -508,6 +511,15 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
                     conv: b.spec.conv == true,
                     fontSize: b.spec.label.count > 4 ? 9 : 11, legend: leg)
         }
+    }
+
+    /// Double-clicking the app while it is already running, or after you have
+    /// closed the panel, must bring the panel back.  Without this, relaunching
+    /// an LSUIElement app appears to do nothing at all -- no Dock icon, no menu
+    /// bar, no window -- which is indistinguishable from being broken.
+    func applicationShouldHandleReopen(_ app: NSApplication, hasVisibleWindows: Bool) -> Bool {
+        panel?.orderFrontRegardless()
+        return true
     }
 
     func applicationSupportsSecureRestorableState(_ app: NSApplication) -> Bool { true }

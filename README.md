@@ -146,6 +146,15 @@ things follow that you should know before running it:
 There is no network code, no telemetry, and nothing is written outside
 `~/.config/deckeys/`.
 
+**Build it, do not download a built copy.** The app is signed with a local
+self-signed identity, so `spctl` rejects it — fine for something you compiled
+yourself (no quarantine attribute), but a downloaded build would be blocked by
+Gatekeeper. There is no notarized distribution.
+
+**It has no Dock icon and no menu bar** (`LSUIElement`), so the floating panel
+is the only visible sign of it. Closing the panel hides it; launching the app
+again brings it back.
+
 ## Notes for anyone hacking on this
 
 Five things cost real time and are not obvious:
