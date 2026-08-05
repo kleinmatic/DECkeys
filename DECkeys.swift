@@ -480,14 +480,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             + "GPL-2.0. No warranty."
         a.addButton(withTitle: "OK")
         a.addButton(withTitle: "GitHub")
+        a.addButton(withTitle: "Docs")
         // The panel never takes focus, so nothing has activated us; without
         // this the alert opens behind whatever you were actually using.
         NSApp.activate(ignoringOtherApps: true)
         let r = a.runModal()
         NSApp.setActivationPolicy(.accessory)
-        if r == .alertSecondButtonReturn,
-           let u = URL(string: "https://github.com/kleinmatic/DECkeys") {
-            NSWorkspace.shared.open(u)
+        let repo = "https://github.com/kleinmatic/DECkeys"
+        switch r {
+        case .alertSecondButtonReturn:
+            if let u = URL(string: repo) { NSWorkspace.shared.open(u) }
+        case .alertThirdButtonReturn:
+            // The README is the documentation -- profile format, the overlay
+            // system, which keys are deliberately absent and why.
+            if let u = URL(string: repo + "/blob/main/README.md") {
+                NSWorkspace.shared.open(u)
+            }
+        default: break
         }
     }
 
